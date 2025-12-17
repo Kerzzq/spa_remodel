@@ -10,7 +10,7 @@ function NavLink({ to, label }) {
         textDecoration: "none",
         padding: "8px 12px",
         borderRadius: 8,
-        color: active ? "white" : "#222",
+        color: "white",
         background: active ? "#222" : "transparent"
       }}
     >
@@ -22,7 +22,7 @@ function NavLink({ to, label }) {
 export default function NavBar() {
   return (
     <div style={{ padding: 16, borderBottom: "1px solid #eee", display: "flex", gap: 8 }}>
-      <div style={{ fontWeight: 700, marginRight: 12 }}>Showroom IA</div>
+      <div style={{ fontWeight: 700, marginRight: 12, fontSize: 28 }}>Showroom IA</div>
       <NavLink to="/" label="Home" />
       <NavLink to="/cases" label="Casos" />
     </div>

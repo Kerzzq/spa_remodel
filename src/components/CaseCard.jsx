@@ -11,6 +11,8 @@ export default function CaseCard({ c }) {
       style={{
         border: "1px solid #e6e6e6",
         borderRadius: 12,
+        background: "black",
+        backgroundOpacity: 10,
         padding: 14,
         display: "flex",
         flexDirection: "column",
