@@ -10,7 +10,9 @@ function safeParse(json, fallback) {
 
 export function getOverridesMap() {
   const raw = localStorage.getItem(OVERRIDES_KEY);
-  return safeParse(raw, {});
+  const parsed = safeParse(raw, {});
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return {};
+  return parsed;
 }
 
 export function setOverridesMap(map) {

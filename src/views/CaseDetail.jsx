@@ -43,7 +43,7 @@ export default function CaseDetail() {
   const title = c.titulo ?? c.title ?? c.nombre ?? `Caso ${c.id}`;
   const desc = c.descripcion ?? c.description ?? "";
   const category = c.categoria ?? c.category ?? c.sector ?? "";
-  const media = c.imagen ?? c.image ?? c.media ?? ""; // si en tu JSON hay algo así
+  const media = c.imagen ?? c.image ?? c.esquema ?? ""; // si en tu JSON hay algo así
 
   return (
     <div style={{ maxWidth: 980, display: "flex", flexDirection: "column", gap: 14 }}>

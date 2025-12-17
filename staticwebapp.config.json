@@ -1,10 +1,18 @@
 
 {
   "routes": [
-    {
-      "route": "/*",
-      "allowedRoles": ["authenticated"]
-    }
+  {
+  "route": "/data/*",
+  "allowedRoles": ["anonymous"]
+  },
+  {
+    "route": "/statics/*",
+    "allowedRoles": ["anonymous"]
+  },
+  {
+    "route": "/*",
+    "allowedRoles": ["authenticated"]
+  }
   ],
   "navigationFallback": {
     "rewrite": "/index.html",
