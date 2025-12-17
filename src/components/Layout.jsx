@@ -1,5 +1,5 @@
 import AppRouter from "../router.jsx";
-import NavBar from "./NavBar.jsx";
+import NavBar from "./Navbar.jsx";
 import Chat from "../copilot/Chat.jsx";
 
 export default function Layout() {
