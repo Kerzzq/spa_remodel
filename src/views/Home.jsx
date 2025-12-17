@@ -8,11 +8,6 @@ export default function Home() {
     <div style={{ maxWidth: 900 }}>
       <h1 style={{ marginTop: 0 }}>Welcome - AIXC</h1>
 
-      <p style={{ opacity: 0.85 }}>
-        Esta es la SPA React migrada (sin iframes internos). Navega a la sección de casos
-        para ver el showroom.
-      </p>
-
       <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
         <Link
           to="/cases"
@@ -44,9 +39,6 @@ export default function Home() {
 
       <hr style={{ margin: "20px 0", border: 0, borderTop: "1px solid #eee" }} />
 
-      <p style={{ opacity: 0.85 }}>
-        Si copiaste <code>/public/statics</code>, luego podemos usar imágenes/tiles como en el HTML original.
-      </p>
     </div>
   );
 }
