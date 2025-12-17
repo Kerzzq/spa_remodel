@@ -1,5 +1,5 @@
-import Layout from "./components/Layout.jsx";
+import AppRouter from "./router.jsx";
 
 export default function App() {
-  return <Layout />;
+  return <AppRouter />;
 }
