@@ -1,20 +1,19 @@
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import Layout from "./components/Layout.jsx";
-import Home from "./views/Home.jsx";
-import Cases from "./views/Cases.jsx";
-import CaseDetail from "./views/CaseDetail.jsx";
+import { createBrowserRouter } from "react-router-dom";
+import Layout from "./components/Layout";
+import Home from "./views/Home";
+import Cases from "./views/Cases";
+import CaseDetail from "./views/CaseDetail";
 
 const router = createBrowserRouter([
   {
-    element: <Layout />,   // 👈 Layout DENTRO del Router
+    path: "/",
+    element: <Layout />,   // 👈 Layout vive AQUÍ
     children: [
-      { path: "/", element: <Home /> },
-      { path: "/cases", element: <Cases /> },
-      { path: "/cases/:id", element: <CaseDetail /> }
+      { index: true, element: <Home /> },
+      { path: "cases", element: <Cases /> },
+      { path: "cases/:id", element: <CaseDetail /> }
     ]
   }
 ]);
 
-export default function AppRouter() {
-  return <RouterProvider router={router} />;
-}
+export default router;

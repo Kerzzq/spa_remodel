@@ -1,149 +1,226 @@
 import { useEffect, useMemo, useState } from "react";
-import CaseCard from "../components/CaseCard.jsx";
-import CaseFilters from "../components/CaseFilters.jsx";
-import EmptyState from "../components/EmptyState.jsx";
-import { clearLocalEdits, loadCases, saveCasePatch } from "../services/casesStore.js";
-
-function groupCases(cases, groupBy) {
-  if (groupBy === "none") return { Todos: cases };
-
-  const keyOf = (c) => {
-    if (groupBy === "category") return (c.categoria ?? c.category ?? c.sector ?? "Sin categoría");
-    if (groupBy === "status") return (c.estado ?? c.status ?? "Sin estado");
-    return "Todos";
-  };
-
-  const out = {};
-  for (const c of cases) {
-    const k = keyOf(c);
-    out[k] = out[k] || [];
-    out[k].push(c);
-  }
-  return out;
-}
+import { Link } from "react-router-dom";
+import { loadCases } from "../services/casesStore.js";
 
 export default function Cases() {
   const [cases, setCases] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [err, setErr] = useState("");
-
-  const [query, setQuery] = useState("");
-  const [groupBy, setGroupBy] = useState("category");
-  const [onlyFavorites, setOnlyFavorites] = useState(false);
-
-  async function refresh() {
-    try {
-      setErr("");
-      setLoading(true);
-      const data = await loadCases();
-      setCases(data);
-    } catch (e) {
-      setErr(e?.message || "Error cargando casos");
-    } finally {
-      setLoading(false);
-    }
-  }
+  const [error, setError] = useState(null);
+  const [activeCategory, setActiveCategory] = useState("ALL");
 
   useEffect(() => {
-    refresh();
+    let mounted = true;
+
+    loadCases()
+      .then((data) => {
+        if (mounted) {
+          setCases(data);
+          setLoading(false);
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        if (mounted) {
+          setError("No se pudieron cargar los casos");
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      mounted = false;
+    };
   }, []);
 
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    return cases.filter((c) => {
-      const title = String(c.titulo ?? c.title ?? c.nombre ?? "");
-      const desc = String(c.descripcion ?? c.description ?? "");
-      const cat = String(c.categoria ?? c.category ?? c.sector ?? "");
-      const hayQ = !q || [title, desc, cat, String(c.id)].some((x) => x.toLowerCase().includes(q));
-      const favOk = !onlyFavorites || Boolean(c.favorito);
-      return hayQ && favOk;
+  /** Categorías únicas para los filtros */
+  const categories = useMemo(() => {
+    const set = new Set();
+    cases.forEach((c) => {
+      if (c.category) set.add(c.category);
     });
-  }, [cases, query, onlyFavorites]);
+    return ["ALL", ...Array.from(set)];
+  }, [cases]);
 
-  const grouped = useMemo(() => groupCases(filtered, groupBy), [filtered, groupBy]);
+  const categoryCounts = useMemo(() => {
+    const counts = {};
+    cases.forEach((c) => {
+      if (!c.category) return;
+        counts[c.category] = (counts[c.category] || 0) + 1;
+    });
+    return counts;
+  }, [cases]);
 
-  if (loading) return <div>Cargando casos…</div>;
-  if (err) return <EmptyState title="No se pudieron cargar los casos" hint={err} />;
+
+  /** Casos filtrados */
+  const filteredCases = useMemo(() => {
+    if (activeCategory === "ALL") return cases;
+    return cases.filter((c) => c.category === activeCategory);
+  }, [cases, activeCategory]);
+
+  if (loading) {
+    return <div style={{ padding: 40, color: "white" }}>Cargando casos…</div>;
+  }
+
+  if (error) {
+    return (
+      <div style={{ padding: 40, color: "#ffb4b4" }}>
+        {error}
+      </div>
+    );
+  }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
-        <h2 style={{ margin: 0 }}>Casos</h2>
-        <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-          <button
-            onClick={refresh}
-            style={{ padding: "10px 14px", borderRadius: 10, border: "1px solid #ddd", background: "white" }}
-          >
-            Recargar
-          </button>
+    <div style={{ maxWidth: 1200, margin: "0 auto", color: "white" }}>
+      {/* TÍTULO */}
+      <h1
+        style={{
+          fontSize: 48,
+          fontWeight: 800,
+          marginBottom: 24
+        }}
+      >
+        Historias de Éxito
+      </h1>
 
-          <button
-            onClick={() => {
-              clearLocalEdits();
-              refresh();
-            }}
-            style={{ padding: "10px 14px", borderRadius: 10, border: "1px solid #ddd", background: "white" }}
-          >
-            Reset cambios locales
-          </button>
-        </div>
+      {/* FILTROS */}
+      <div
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: 12,
+          marginBottom: 32
+        }}
+      >
+        {categories.map((cat) => {
+  const active = activeCategory === cat;
+  const count =
+    cat === "ALL"
+      ? cases.length
+      : categoryCounts[cat] ?? 0;
+
+  return (
+    <button
+      key={cat}
+      onClick={() => setActiveCategory(cat)}
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 8,
+        borderRadius: 999,
+        padding: "8px 14px",
+        fontSize: 13,
+        fontWeight: 600,
+        cursor: "pointer",
+        border: active ? "none" : "1px solid rgba(255,255,255,0.4)",
+        background: active ? "#e91e63" : "transparent",
+        color: "white"
+      }}
+    >
+              <span>
+                {cat === "ALL" ? "Ver todos" : cat}
+              </span>
+
+              {/* CONTADOR */}
+              <span
+                style={{
+                  minWidth: 22,
+                  height: 22,
+                  borderRadius: "50%",
+                  background: active
+                    ? "rgba(255,255,255,0.25)"
+                    : "#e91e63",
+                  color: "white",
+                  fontSize: 11,
+                  fontWeight: 700,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  lineHeight: 1
+                }}
+              >
+                {count}
+              </span>
+            </button>
+          );
+        })}
       </div>
 
-      <CaseFilters
-        query={query}
-        setQuery={setQuery}
-        groupBy={groupBy}
-        setGroupBy={setGroupBy}
-        onlyFavorites={onlyFavorites}
-        setOnlyFavorites={setOnlyFavorites}
-      />
-
-      {filtered.length === 0 ? (
-        <EmptyState title="Sin resultados" hint="Prueba con otra búsqueda o quita filtros." />
-      ) : (
-        Object.entries(grouped).map(([group, list]) => (
-          <div key={group} style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            <div style={{ fontWeight: 700, marginTop: 10 }}>{group}</div>
-
-            <div
+      {/* GRID DE CASOS */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))",
+          gap: 24
+        }}
+      >
+        {filteredCases.map((c) => (
+          <Link
+            key={c.id}
+            to={`/cases/${c.id}`}
+            style={{ textDecoration: "none" }}
+          >
+            <article
               style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))",
-                gap: 12
+                background: "white",
+                borderRadius: 18,
+                padding: 28,
+                height: "100%",
+                display: "flex",
+                flexDirection: "column",
+                gap: 12,
+                boxShadow: "0 10px 30px rgba(0,0,0,0.18)",
+                transition: "transform 0.2s ease"
               }}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.transform = "translateY(-4px)")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.transform = "translateY(0)")
+              }
             >
-              {list.map((c) => (
-                <div key={c.id} style={{ position: "relative" }}>
-                  <CaseCard c={c} />
+              {/* CATEGORÍA */}
+              {c.category && (
+                <span
+                  style={{
+                    alignSelf: "flex-start",
+                    background: "#e91e63",
+                    color: "white",
+                    fontSize: 12,
+                    fontWeight: 700,
+                    padding: "4px 12px",
+                    borderRadius: 999
+                  }}
+                >
+                  {c.category}
+                </span>
+              )}
 
-                  {/* Favorito rápido */}
-                  <button
-                    onClick={() => {
-                      saveCasePatch(c.id, { favorito: !c.favorito });
-                      setCases((prev) =>
-                        prev.map((x) => (x.id === c.id ? { ...x, favorito: !c.favorito } : x))
-                      );
-                    }}
-                    style={{
-                      position: "absolute",
-                      top: 10,
-                      right: 10,
-                      borderRadius: 999,
-                      border: "1px solid #ddd",
-                      background: "white",
-                      padding: "6px 10px",
-                      cursor: "pointer"
-                    }}
-                    title="Marcar como favorito"
-                  >
-                    {c.favorito ? "★" : "☆"}
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        ))
-      )}
+              {/* TÍTULO */}
+              <h2
+                style={{
+                  fontSize: 20,
+                  fontWeight: 800,
+                  color: "#111"
+                }}
+              >
+                {c.title ?? c.name}
+              </h2>
+
+              {/* DESCRIPCIÓN */}
+              {c.description && (
+                <p
+                  style={{
+                    color: "#555",
+                    fontSize: 14,
+                    lineHeight: 1.6
+                  }}
+                >
+                  {c.description}
+                </p>
+              )}
+            </article>
+          </Link>
+        ))}
+      </div>
     </div>
   );
 }

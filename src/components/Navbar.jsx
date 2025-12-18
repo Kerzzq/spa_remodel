@@ -1,30 +1,58 @@
-import { Link, useLocation } from "react-router-dom";
-
-function NavLink({ to, label }) {
-  const { pathname } = useLocation();
-  const active = pathname === to;
-  return (
-    <Link
-      to={to}
-      style={{
-        textDecoration: "none",
-        padding: "8px 12px",
-        borderRadius: 8,
-        color: "white",
-        background: active ? "#222" : "transparent"
-      }}
-    >
-      {label}
-    </Link>
-  );
-}
+import { NavLink } from "react-router-dom";
 
 export default function NavBar() {
   return (
-    <div style={{ padding: 16, borderBottom: "1px solid #eee", display: "flex", gap: 8 }}>
-      <div style={{ fontWeight: 700, marginRight: 12, fontSize: 28 }}>Showroom IA</div>
-      <NavLink to="/" label="Home" />
-      <NavLink to="/cases" label="Casos" />
-    </div>
+    <header
+      style={{
+        padding: "24px 32px",
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        borderBottom: "1px solid rgba(255,255,255,0.15)"
+      }}
+    >
+      {/* Logo Inetum */}
+      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+        <span style={{ fontWeight: 900, fontSize: 24 }}>
+          inetum
+          <span
+            style={{
+              display: "inline-block",
+              width: 8,
+              height: 8,
+              background: "white",
+              marginLeft: 2
+            }}
+          />
+        </span>
+      </div>
+
+      {/* Navegación */}
+      <nav style={{ display: "flex", gap: 24, fontSize: 14 }}>
+        <NavLink to="/" style={navLink}>
+          Home
+        </NavLink>
+        <a href="#" style={linkStyle}>Soluciones</a>
+        <a href="#" style={linkStyle}>Sectores</a>
+
+        <NavLink to="/cases" style={navLink}>
+          Historias de Éxito
+        </NavLink>
+
+        <a href="#" style={linkStyle}>Contacto</a>
+      </nav>
+    </header>
   );
 }
+
+const linkStyle = {
+  color: "rgba(255,255,255,0.85)",
+  textDecoration: "none",
+  fontWeight: 500
+};
+
+const navLink = ({ isActive }) => ({
+  color: "white",
+  fontWeight: 700,
+  textDecoration: "none"
+});

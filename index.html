@@ -12,37 +12,17 @@
     }
 
     body {
-      font-family: Arial, Helvetica, sans-serif;
-      background-color: #051933;
-      background-image: url('statics/background.png');
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
-      color: white;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
+      margin: 0;
+      padding: 0;
       min-height: 100vh;
-      padding: 2rem;
+      font-family: Arial, Helvetica, sans-serif;
+      background: transparent; /* 👈 fondo lo controla Layout */
+      color: white;
+      overflow-x: hidden;
     }
 
-    .header {
-      width: 100%;
-      display: flex;
-      justify-content: flex-start;
-      font-weight: bold;
-      font-size: 1.2rem;
-      margin-bottom: 2rem;
-      margin-left: 7rem;
-    }
-
-    .avatar {
-      width: 140px;
-      height: 140px;
-      border-radius: 50%;
-      object-fit: cover;
-      margin-bottom: 1.5rem;
+    #root {
+      min-height: 100vh;
     }
 
     h1 {
@@ -91,15 +71,7 @@
         padding: 0.8rem;
       }
 
-      .avatar {
-        width: 100px;
-        height: 100px;
-      }
 
-      .header {
-        font-size: 1rem;
-        margin-bottom: 1rem;
-      }
     }
   </style>
   </head>

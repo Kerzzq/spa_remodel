@@ -1,15 +1,19 @@
 import { Outlet } from "react-router-dom";
-import NavBar from "./Navbar.jsx";
+import NavBar from "./Navbar"; // 👈 importante: case correcto
+import "./Layout.css";
 
 export default function Layout() {
   return (
-    <div style={{ display: "flex", height: "100vh" }}>
-      {/* Contenido */}
-      <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+    <div className="layoutRoot">
+      <div className="layoutOverlay" />
+
+      <div className="layoutContent">
         <NavBar />
-        <div style={{ flex: 1, overflow: "auto", padding: 20 }}>
+
+        {/* 👇 SIN overflow interno: scroll solo en body */}
+        <main className="layoutMain">
           <Outlet />
-        </div>
+        </main>
       </div>
     </div>
   );

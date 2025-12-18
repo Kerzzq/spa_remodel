@@ -5,7 +5,7 @@ export default function Home() {
   const { uiMessage, setUiMessage } = useApp();
 
   return (
-    <div style={{ maxWidth: 900, alignItems: "center", display: "flex", flexDirection: "column", gap: 3 }}>
+    <div style={{ alignItems: "center", display: "flex", flexDirection: "column", gap: 3 }}>
       <h1 style={{ marginTop: 0 }}>Welcome - AIXC</h1>
 
       <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
@@ -15,6 +15,7 @@ export default function Home() {
             border: "1px solid #e6e6e6",
             borderRadius: 12,
             backgroundOpacity: 10,
+            fontWeight: 900,
             color: "white",
             padding: 20,
             display: "flex",

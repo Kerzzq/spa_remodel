@@ -1,0 +1,35 @@
+.layoutRoot {
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+  font-family: Inter, system-ui, sans-serif;
+  color: white;
+
+  background: radial-gradient(circle at top left, #4a0f60 0%, #1a0526 100%);
+}
+
+/* overlay grid */
+.layoutOverlay {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+  background-size: 60px 60px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.layoutContent {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+.layoutMain {
+  flex: 1;
+  padding: 32px;
+  /* 👇 NO overflow aquí */
+}
+
