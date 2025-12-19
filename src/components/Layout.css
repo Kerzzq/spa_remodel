@@ -32,4 +32,57 @@
   padding: 32px;
   /* 👇 NO overflow aquí */
 }
+.inetumLogo {
+  display: flex;
+  align-items: center;
+}
 
+.inetumWord {
+  font-weight: 900;
+  font-size: 26px;
+  letter-spacing: -0.8px;
+  line-height: 1;
+  color: white;
+}
+
+/* Contenedor del símbolo */
+.inetumMark {
+  position: relative;
+  width: 15px;
+  height: 15px;
+  margin-left: 4px;
+}
+
+/* Cuadrados */
+.inetumSquare {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+}
+
+/* Cuadrado superior derecha */
+.inetumSquare.ad {
+  background-color: #1f9a9a; 
+  top: 0;
+  right: 0;
+}
+
+/* Cuadrado superior medio*/
+.inetumSquare.am {
+  background-color: #1f9a9a; 
+  top: 0;
+  right: 5px;
+}
+
+/* Cuadrado superior medio derecha*/
+.inetumSquare.md {
+  background-color: #1f9a9a; 
+  bottom: 5px;
+  right: 0;
+}
+/* Cuadrado inferior izq */
+.inetumSquare.ii {
+  background-color: #1f9a9a; 
+  bottom: 0px;
+  left: 0;
+}

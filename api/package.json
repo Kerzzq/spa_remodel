@@ -1,0 +1,7 @@
+{
+  "name": "api",
+  "type": "module",
+  "dependencies": {
+    "@azure/identity": "^4.5.0"
+  }
+}

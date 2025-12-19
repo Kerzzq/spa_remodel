@@ -12,20 +12,17 @@ export default function NavBar() {
       }}
     >
       {/* Logo Inetum */}
-      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-        <span style={{ fontWeight: 900, fontSize: 24 }}>
-          inetum
-          <span
-            style={{
-              display: "inline-block",
-              width: 8,
-              height: 8,
-              background: "white",
-              marginLeft: 2
-            }}
-          />
+      <div className="inetumLogo">
+        <span className="inetumWord">inetum</span>
+
+        <span className="inetumMark">
+          <span className="inetumSquare ad" />
+          <span className="inetumSquare am" />
+          <span className="inetumSquare md" />
+          <span className="inetumSquare ii" />
         </span>
       </div>
+
 
       {/* Navegación */}
       <nav style={{ display: "flex", gap: 24, fontSize: 14 }}>
@@ -33,7 +30,6 @@ export default function NavBar() {
           Home
         </NavLink>
         <a href="#" style={linkStyle}>Soluciones</a>
-        <a href="#" style={linkStyle}>Sectores</a>
 
         <NavLink to="/cases" style={navLink}>
           Historias de Éxito
