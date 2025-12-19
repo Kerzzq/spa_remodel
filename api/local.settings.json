@@ -1,0 +1,9 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "node",
+    "DATAVERSE_URL": "https://org1a1ca72a.crm12.dynamics.com",
+    "DATAVERSE_TABLE": "contoso_casos"
+  }
+}

@@ -9,23 +9,24 @@ export default function NavBar() {
         justifyContent: "space-between",
         alignItems: "center",
         borderBottom: "1px solid rgba(255,255,255,0.15)"
-      }}
+      }} 
     >
-      {/* Logo Inetum */}
-      <div className="inetumLogo">
-        <span className="inetumWord">inetum</span>
 
-        <span className="inetumMark">
-          <span className="inetumSquare ad" />
-          <span className="inetumSquare am" />
-          <span className="inetumSquare md" />
-          <span className="inetumSquare ii" />
-        </span>
+       {/* Logo AMAIA */}
+      <div style={{ display: "flex", alignItems: "center" }}>
+        <img
+          src="/statics/amaia_logo_white.png"
+          alt="AMAIA"
+          style={{
+            height: 52,
+            objectFit: "contain"
+          }}
+        />
       </div>
 
 
       {/* Navegación */}
-      <nav style={{ display: "flex", gap: 24, fontSize: 14 }}>
+      <nav style={{ display: "flex", gap: 24, fontSize: 16 }}>
         <NavLink to="/" style={navLink}>
           Home
         </NavLink>

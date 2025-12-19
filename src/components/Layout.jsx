@@ -1,5 +1,6 @@
 import { Outlet } from "react-router-dom";
-import NavBar from "./Navbar"; // 👈 importante: case correcto
+import NavBar from "./Navbar";
+import Footer from "./Footer.jsx";
 import "./Layout.css";
 
 export default function Layout() {
@@ -15,6 +16,7 @@ export default function Layout() {
           <Outlet />
         </main>
       </div>
+      <Footer />
     </div>
   );
 }
