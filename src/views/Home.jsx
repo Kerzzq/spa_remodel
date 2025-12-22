@@ -6,7 +6,28 @@ export default function Home() {
 
   return (
     <div style={{ alignItems: "center", display: "flex", flexDirection: "column", gap: 3 }}>
-      <h1 style={{ marginTop: 0 }}>Welcome - AIXC</h1>
+      <h1 style={{ marginTop: 0 }}>Welcome - Amaia</h1>
+
+      <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
+        <Link
+          to="/"
+          style={{
+            border: "1px solid #e6e6e6",
+            borderRadius: 12,
+            backgroundOpacity: 10,
+            fontWeight: 900,
+            color: "white",
+            padding: 20,
+            display: "flex",
+            flexDirection: "column",
+            gap: 8,
+            textDecoration: "none",
+          }}
+        >
+          Amaia presentation
+        </Link>
+      </div>
+
 
       <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
         <Link
@@ -24,7 +45,51 @@ export default function Home() {
             textDecoration: "none",
           }}
         >
-          Ver casos →
+          Success Stories
+        </Link>
+      </div>
+
+
+
+
+      <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
+        <Link
+          to="/"
+          style={{
+            border: "1px solid #e6e6e6",
+            borderRadius: 12,
+            backgroundOpacity: 10,
+            fontWeight: 900,
+            color: "white",
+            padding: 20,
+            display: "flex",
+            flexDirection: "column",
+            gap: 8,
+            textDecoration: "none",
+          }}
+        >
+          Let's explore
+        </Link>
+      </div>
+
+
+            <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
+        <Link
+          to="/"
+          style={{
+            border: "1px solid #e6e6e6",
+            borderRadius: 12,
+            backgroundOpacity: 10,
+            fontWeight: 900,
+            color: "white",
+            padding: 20,
+            display: "flex",
+            flexDirection: "column",
+            gap: 8,
+            textDecoration: "none",
+          }}
+        >
+          Administration
         </Link>
       </div>
 

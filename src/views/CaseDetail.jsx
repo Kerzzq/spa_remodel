@@ -1,126 +1,208 @@
-import { useEffect, useMemo, useState } from "react";
-import { Link, useParams } from "react-router-dom";
-import EmptyState from "../components/EmptyState.jsx";
-import { loadCases, saveCasePatch } from "../services/casesStore.js";
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 
 export default function CaseDetail() {
   const { id } = useParams();
-
-  const [cases, setCases] = useState([]);
+  const [caseData, setCaseData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [err, setErr] = useState("");
-
-  const [note, setNote] = useState("");
-  const [status, setStatus] = useState("");
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    (async () => {
-      try {
-        setErr("");
-        setLoading(true);
-        const data = await loadCases();
-        setCases(data);
-      } catch (e) {
-        setErr(e?.message || "Error cargando el caso");
-      } finally {
+    fetch("/api/cases")
+      .then((res) => {
+        if (!res.ok) throw new Error("API error");
+        return res.json();
+      })
+      .then((data) => {
+        const found = data.find((c) => String(c.id) === String(id));
+        if (!found) throw new Error("Caso no encontrado");
+        setCaseData(found);
         setLoading(false);
-      }
-    })();
-  }, []);
+      })
+      .catch((e) => {
+        setError(e.message);
+        setLoading(false);
+      });
+  }, [id]);
 
-  const c = useMemo(() => cases.find((x) => String(x.id) === String(id)), [cases, id]);
+  if (loading) {
+    return <div style={{ padding: 60, color: "white" }}>Cargando caso…</div>;
+  }
 
-  useEffect(() => {
-    if (!c) return;
-    setNote(String(c.nota ?? ""));
-    setStatus(String(c.estado ?? c.status ?? ""));
-  }, [c]);
+  if (error) {
+    return <div style={{ padding: 60, color: "#ffb4b4" }}>{error}</div>;
+  }
 
-  if (loading) return <div>Cargando caso…</div>;
-  if (err) return <EmptyState title="No se pudo cargar el caso" hint={err} />;
-  if (!c) return <EmptyState title="Caso no encontrado" hint={`No existe el caso con id ${id}.`} />;
-
-  const title = c.titulo ?? c.title ?? c.nombre ?? `Caso ${c.id}`;
-  const desc = c.descripcion ?? c.description ?? "";
-  const category = c.categoria ?? c.category ?? c.sector ?? "";
-  const media = c.imagen ?? c.image ?? c.esquema ?? ""; // si en tu JSON hay algo así
+  const {
+    title,
+    category,
+    sector,
+    year,
+    description,
+    solution,
+    benefits,
+    roles,
+    services,
+    technology,
+    budget,
+    status
+  } = caseData;
 
   return (
-    <div style={{ maxWidth: 980, display: "flex", flexDirection: "column", gap: 14 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
-        <div>
-          <div style={{ fontSize: 12, opacity: 0.7 }}>
-            <Link to="/cases">← Volver</Link>
-          </div>
-          <h2 style={{ margin: "6px 0" }}>{title}</h2>
-          <div style={{ opacity: 0.8 }}>{category}</div>
-        </div>
+    <div style={{ maxWidth: 1200, margin: "0 auto", color: "white" }}>
+      {/* CABECERA */}
+      <div style={{ marginBottom: 32 }}>
+        {category && (
+          <span
+            style={{
+              background: "#e91e63",
+              padding: "6px 14px",
+              borderRadius: 999,
+              fontSize: 12,
+              fontWeight: 700
+            }}
+          >
+            {category}
+          </span>
+        )}
 
-        <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-          <div style={{ fontSize: 12, opacity: 0.7 }}>ID: {c.id}</div>
-        </div>
-      </div>
-
-      {desc ? <p style={{ margin: 0, opacity: 0.9 }}>{desc}</p> : null}
-
-      {/* Media opcional si existe ruta en JSON */}
-      {media ? (
-        <div style={{ border: "1px solid #eee", borderRadius: 12, overflow: "hidden" }}>
-          {/* si media es una imagen en /statics/... */}
-          <img src={media} alt={title} style={{ width: "100%", display: "block" }} />
-        </div>
-      ) : null}
-
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-        <div style={{ border: "1px solid #eee", borderRadius: 12, padding: 14 }}>
-          <div style={{ fontWeight: 700, marginBottom: 8 }}>Estado</div>
-          <input
-            value={status}
-            onChange={(e) => setStatus(e.target.value)}
-            placeholder="Ej: En progreso / Completado..."
-            style={{ width: "100%", padding: 10, borderRadius: 10, border: "1px solid #ddd" }}
-          />
-        </div>
-
-        <div style={{ border: "1px solid #eee", borderRadius: 12, padding: 14 }}>
-          <div style={{ fontWeight: 700, marginBottom: 8 }}>Nota interna</div>
-          <textarea
-            value={note}
-            onChange={(e) => setNote(e.target.value)}
-            placeholder="Apuntes sobre el caso..."
-            rows={4}
-            style={{ width: "100%", padding: 10, borderRadius: 10, border: "1px solid #ddd", resize: "vertical" }}
-          />
-        </div>
-      </div>
-
-      <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-        <button
-          onClick={() => {
-            saveCasePatch(c.id, { nota: note, estado: status });
-            setCases((prev) => prev.map((x) => (x.id === c.id ? { ...x, nota: note, estado: status } : x)));
-          }}
+        <h1
           style={{
-            padding: "10px 14px",
-            borderRadius: 10,
-            border: "1px solid #ddd",
-            background: "#222",
-            color: "white"
+            fontSize: 42,
+            fontWeight: 800,
+            marginTop: 16,
+            marginBottom: 12,
+            lineHeight: 1.2
           }}
         >
-          Guardar cambios (local)
-        </button>
+          {title}
+        </h1>
 
-        <button
-          onClick={() => {
-            setNote(String(c.nota ?? ""));
-            setStatus(String(c.estado ?? c.status ?? ""));
-          }}
-          style={{ padding: "10px 14px", borderRadius: 10, border: "1px solid #ddd", background: "white" }}
-        >
-          Revertir
-        </button>
+        <div style={{ opacity: 0.85, fontSize: 14 }}>
+          {sector && <>Sector: {sector}</>}
+          {year && <> · Año: {year}</>}
+        </div>
       </div>
+
+      {/* GRID PRINCIPAL */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "2fr 1fr",
+          gap: 28
+        }}
+      >
+        {/* COLUMNA IZQUIERDA */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+          <Section title="Descripción y contexto">
+            <p>{description}</p>
+          </Section>
+
+          {solution && (
+            <Section title="Solución propuesta">
+              <p>{solution}</p>
+            </Section>
+          )}
+
+          {services?.length > 0 && (
+            <Section title="Servicios entregados">
+              <ul>
+                {services.map((s) => (
+                  <li key={s}>{s}</li>
+                ))}
+              </ul>
+            </Section>
+          )}
+        </div>
+
+        {/* COLUMNA DERECHA */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+          {budget && (
+            <Card title="Coste del proyecto">
+              <div style={{ fontSize: 28, fontWeight: 800 }}>{budget}</div>
+              {status && (
+                <div style={{ fontSize: 12, opacity: 0.8 }}>{status}</div>
+              )}
+            </Card>
+          )}
+
+          {benefits?.length > 0 && (
+            <Card title="Beneficios clave">
+              <ul>
+                {benefits.map((b) => (
+                  <li key={b}>{b}</li>
+                ))}
+              </ul>
+            </Card>
+          )}
+
+          {roles?.length > 0 && (
+            <Card title="Roles involucrados">
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                {roles.map((r) => (
+                  <span
+                    key={r}
+                    style={{
+                      background: "rgba(255,255,255,0.15)",
+                      padding: "6px 12px",
+                      borderRadius: 999,
+                      fontSize: 12
+                    }}
+                  >
+                    {r}
+                  </span>
+                ))}
+              </div>
+            </Card>
+          )}
+
+          {technology?.length > 0 && (
+            <Card title="Tecnología">
+              <ul>
+                {technology.map((t) => (
+                  <li key={t}>{t}</li>
+                ))}
+              </ul>
+            </Card>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ---------- COMPONENTES AUX ---------- */
+
+function Section({ title, children }) {
+  return (
+    <div
+      style={{
+        background: "rgba(255,255,255,0.06)",
+        borderRadius: 18,
+        padding: 24
+      }}
+    >
+      <h2 style={{ fontSize: 20, fontWeight: 800, marginBottom: 12 }}>
+        {title}
+      </h2>
+      {children}
+    </div>
+  );
+}
+
+function Card({ title, children }) {
+  return (
+    <div
+      style={{
+        background: "rgba(255,255,255,0.08)",
+        borderRadius: 18,
+        padding: 20
+      }}
+    >
+      <h3 style={{ fontSize: 16, fontWeight: 800, marginBottom: 12 }}>
+        {title}
+      </h3>
+      {children}
     </div>
   );
 }
