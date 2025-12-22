@@ -5,13 +5,12 @@
       "type": "httpTrigger",
       "direction": "in",
       "name": "req",
-      "methods": ["get"],
-      "route": "cases"
+      "methods": ["get"]
     },
     {
       "type": "http",
       "direction": "out",
-      "name": "res"
+      "name": "$return"
     }
   ]
 }
