@@ -10,12 +10,16 @@ export default function CaseDetail() {
   useEffect(() => {
     fetch("/api/cases")
       .then((res) => {
-        if (!res.ok) throw new Error("API error");
+        if (!res.ok) throw new Error("Error al cargar el caso");
         return res.json();
       })
       .then((data) => {
-        const found = data.find((c) => String(c.id) === String(id));
+        const found = Array.isArray(data)
+          ? data.find((c) => String(c.id) === String(id))
+          : null;
+
         if (!found) throw new Error("Caso no encontrado");
+
         setCaseData(found);
         setLoading(false);
       })
@@ -33,6 +37,9 @@ export default function CaseDetail() {
     return <div style={{ padding: 60, color: "#ffb4b4" }}>{error}</div>;
   }
 
+  /* =========================
+     DESESTRUCTURADO
+     ========================= */
   const {
     title,
     category,
@@ -48,9 +55,27 @@ export default function CaseDetail() {
     status
   } = caseData;
 
+  /* =========================
+     NORMALIZACIÓN DEFENSIVA
+     (string | array | null)
+     ========================= */
+  const benefitsArr =
+    Array.isArray(benefits) ? benefits : benefits ? [benefits] : [];
+
+  const rolesArr =
+    Array.isArray(roles) ? roles : roles ? [roles] : [];
+
+  const servicesArr =
+    Array.isArray(services) ? services : services ? [services] : [];
+
+  const technologyArr =
+    Array.isArray(technology) ? technology : technology ? [technology] : [];
+
   return (
     <div style={{ maxWidth: 1200, margin: "0 auto", color: "white" }}>
-      {/* CABECERA */}
+      {/* =========================
+          CABECERA
+          ========================= */}
       <div style={{ marginBottom: 32 }}>
         {category && (
           <span
@@ -84,7 +109,9 @@ export default function CaseDetail() {
         </div>
       </div>
 
-      {/* GRID PRINCIPAL */}
+      {/* =========================
+          GRID PRINCIPAL
+          ========================= */}
       <div
         style={{
           display: "grid",
@@ -92,11 +119,13 @@ export default function CaseDetail() {
           gap: 28
         }}
       >
-        {/* COLUMNA IZQUIERDA */}
+        {/* -------- COLUMNA IZQUIERDA -------- */}
         <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
-          <Section title="Descripción y contexto">
-            <p>{description}</p>
-          </Section>
+          {description && (
+            <Section title="Descripción y contexto">
+              <p>{description}</p>
+            </Section>
+          )}
 
           {solution && (
             <Section title="Solución propuesta">
@@ -104,18 +133,18 @@ export default function CaseDetail() {
             </Section>
           )}
 
-          {services?.length > 0 && (
+          {servicesArr.length > 0 && (
             <Section title="Servicios entregados">
               <ul>
-                {services.map((s) => (
-                  <li key={s}>{s}</li>
+                {servicesArr.map((s, i) => (
+                  <li key={i}>{s}</li>
                 ))}
               </ul>
             </Section>
           )}
         </div>
 
-        {/* COLUMNA DERECHA */}
+        {/* -------- COLUMNA DERECHA -------- */}
         <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
           {budget && (
             <Card title="Coste del proyecto">
@@ -126,22 +155,22 @@ export default function CaseDetail() {
             </Card>
           )}
 
-          {benefits?.length > 0 && (
+          {benefitsArr.length > 0 && (
             <Card title="Beneficios clave">
               <ul>
-                {benefits.map((b) => (
-                  <li key={b}>{b}</li>
+                {benefitsArr.map((b, i) => (
+                  <li key={i}>{b}</li>
                 ))}
               </ul>
             </Card>
           )}
 
-          {roles?.length > 0 && (
+          {rolesArr.length > 0 && (
             <Card title="Roles involucrados">
               <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-                {roles.map((r) => (
+                {rolesArr.map((r, i) => (
                   <span
-                    key={r}
+                    key={i}
                     style={{
                       background: "rgba(255,255,255,0.15)",
                       padding: "6px 12px",
@@ -156,11 +185,11 @@ export default function CaseDetail() {
             </Card>
           )}
 
-          {technology?.length > 0 && (
+          {technologyArr.length > 0 && (
             <Card title="Tecnología">
               <ul>
-                {technology.map((t) => (
-                  <li key={t}>{t}</li>
+                {technologyArr.map((t, i) => (
+                  <li key={i}>{t}</li>
                 ))}
               </ul>
             </Card>
@@ -171,7 +200,9 @@ export default function CaseDetail() {
   );
 }
 
-/* ---------- COMPONENTES AUX ---------- */
+/* =========================
+   COMPONENTES AUXILIARES
+   ========================= */
 
 function Section({ title, children }) {
   return (
