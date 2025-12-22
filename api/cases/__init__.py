@@ -5,14 +5,13 @@ from azure.cosmos import CosmosClient
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
     try:
-        endpoint = os.environ["COSMOS_ENDPOINT"]
-        key = os.environ["COSMOS_KEY"]
-        database_name = os.environ["COSMOS_DATABASE"]
-        container_name = os.environ["COSMOS_CONTAINER"]
+        client = CosmosClient(
+            os.environ["COSMOS_ENDPOINT"],
+            os.environ["COSMOS_KEY"]
+        )
 
-        client = CosmosClient(endpoint, key)
-        database = client.get_database_client(database_name)
-        container = database.get_container_client(container_name)
+        database = client.get_database_client(os.environ["COSMOS_DATABASE"])
+        container = database.get_container_client(os.environ["COSMOS_CONTAINER"])
 
         items = list(
             container.query_items(
@@ -22,13 +21,13 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         )
 
         return func.HttpResponse(
-            body=json.dumps(items),
+            json.dumps(items),
             status_code=200,
             mimetype="application/json"
         )
 
     except Exception as e:
         return func.HttpResponse(
-            body=str(e),
+            f"Exception: {str(e)}",
             status_code=500
         )
