@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { loadCases } from "../services/casesStore.js";
 
 export default function Cases() {
   const [cases, setCases] = useState([]);
@@ -10,10 +9,26 @@ export default function Cases() {
   const [filterMode, setFilterMode] = useState("category"); // category | sector
   const [activeFilters, setActiveFilters] = useState([]); // múltiples
 
+  /* =========================
+     CARGA DESDE API (COSMOS)
+     ========================= */
   useEffect(() => {
-    loadCases()
+    fetch("/api/cases")
+      .then((res) => {
+        if (!res.ok) throw new Error("Error al cargar casos");
+        return res.json();
+      })
       .then((data) => {
-        setCases(data);
+        // Normalización defensiva (Cosmos es flexible)
+        const normalized = data.map((c) => ({
+          id: c.id,
+          title: c.title ?? c.name ?? "Sin título",
+          description: c.description ?? "",
+          category: c.category ?? "Otros",
+          sector: c.sector ?? "General"
+        }));
+
+        setCases(normalized);
         setLoading(false);
       })
       .catch(() => {
@@ -22,7 +37,9 @@ export default function Cases() {
       });
   }, []);
 
-  /* Conteo por categoría / sector */
+  /* =========================
+     CONTEO POR FILTRO
+     ========================= */
   const filterCounts = useMemo(() => {
     const map = {};
 
@@ -37,7 +54,9 @@ export default function Cases() {
       .sort((a, b) => b[1] - a[1]);
   }, [cases, filterMode]);
 
-  /* Casos filtrados */
+  /* =========================
+     CASOS FILTRADOS
+     ========================= */
   const filteredCases = useMemo(() => {
     if (activeFilters.length === 0) return cases;
 
@@ -47,7 +66,9 @@ export default function Cases() {
     });
   }, [cases, activeFilters, filterMode]);
 
-  /* Toggle filtro individual */
+  /* =========================
+     TOGGLE FILTRO
+     ========================= */
   function toggleFilter(value) {
     setActiveFilters((prev) =>
       prev.includes(value)
@@ -56,11 +77,13 @@ export default function Cases() {
     );
   }
 
-  /* Reset filtros */
   function clearFilters() {
     setActiveFilters([]);
   }
 
+  /* =========================
+     ESTADOS
+     ========================= */
   if (loading) {
     return <div style={{ padding: 40, color: "white" }}>Cargando casos…</div>;
   }
@@ -109,7 +132,6 @@ export default function Cases() {
           marginBottom: 32
         }}
       >
-        {/* VER TODOS */}
         <FilterButton
           label="Ver todos"
           count={cases.length}
@@ -173,7 +195,7 @@ export default function Cases() {
                 </span>
               )}
 
-              {/* TÍTULO (3 líneas) */}
+              {/* TÍTULO */}
               <h2
                 style={{
                   fontSize: 20,
@@ -186,10 +208,10 @@ export default function Cases() {
                   overflow: "hidden"
                 }}
               >
-                {c.title ?? c.name}
+                {c.title}
               </h2>
 
-              {/* DESCRIPCIÓN (4 líneas) */}
+              {/* DESCRIPCIÓN */}
               {c.description && (
                 <p
                   style={{
@@ -213,7 +235,9 @@ export default function Cases() {
   );
 }
 
-/* BOTÓN DE FILTRO */
+/* =========================
+   BOTÓN DE FILTRO
+   ========================= */
 function FilterButton({ label, count, active, onClick }) {
   return (
     <button
