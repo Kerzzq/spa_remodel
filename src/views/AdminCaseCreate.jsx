@@ -69,7 +69,7 @@ export default function AdminCaseCreate() {
         throw new Error("Error al crear el caso");
       }
 
-      navigate("/admin");
+      navigate("/administration");
     } catch (e) {
       setError(e.message);
     } finally {
