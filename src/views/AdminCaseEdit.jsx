@@ -7,32 +7,61 @@ export default function AdminCaseEdit() {
 
   const [form, setForm] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState(null);
 
+  /* =========================
+     CARGA DEL CASO POR ID
+     ========================= */
   useEffect(() => {
-    fetch("/api/cases")
-      .then((res) => res.json())
-      .then((data) => {
-        const found = data.find((c) => String(c.id) === String(id));
-        if (!found) throw new Error();
+    setLoading(true);
+    setError(null);
 
+    fetch(`/api/cases/${id}`)
+      .then((res) => {
+        if (res.status === 404) {
+          throw new Error("Caso no encontrado");
+        }
+        if (!res.ok) {
+          throw new Error("Error al cargar el caso");
+        }
+        return res.json();
+      })
+      .then((data) => {
         setForm({
-          ...found,
-          benefits: (found.benefits || []).join("\n"),
-          services: (found.services || []).join("\n"),
-          roles: (found.roles || []).join("\n"),
-          technology: (found.technology || []).join("\n")
+          title: data.title ?? "",
+          category: data.category ?? "",
+          sector: data.sector ?? "",
+          year: data.year ?? "",
+          description: data.description ?? "",
+          solution: data.solution ?? "",
+          benefits: Array.isArray(data.benefits)
+            ? data.benefits.join("\n")
+            : data.benefits ?? "",
+          services: Array.isArray(data.services)
+            ? data.services.join("\n")
+            : data.services ?? "",
+          roles: Array.isArray(data.roles)
+            ? data.roles.join("\n")
+            : data.roles ?? "",
+          technology: Array.isArray(data.technology)
+            ? data.technology.join("\n")
+            : data.technology ?? "",
+          budget: data.budget ?? "",
+          status: data.status ?? ""
         });
 
         setLoading(false);
       })
-      .catch(() => {
-        setError("Caso no encontrado");
+      .catch((e) => {
+        setError(e.message);
         setLoading(false);
       });
   }, [id]);
 
+  /* =========================
+     HANDLERS
+     ========================= */
   function handleChange(e) {
     setForm({ ...form, [e.target.name]: e.target.value });
   }
@@ -45,7 +74,9 @@ export default function AdminCaseEdit() {
   }
 
   function validate() {
-    return Object.values(form).every((v) => String(v).trim() !== "");
+    return Object.values(form).every(
+      (v) => String(v).trim() !== ""
+    );
   }
 
   async function handleSubmit(e) {
@@ -75,16 +106,21 @@ export default function AdminCaseEdit() {
         body: JSON.stringify(payload)
       });
 
-      if (!res.ok) throw new Error();
+      if (!res.ok) {
+        throw new Error("Error al guardar cambios");
+      }
 
       navigate("/admin");
-    } catch {
-      setError("Error al guardar cambios");
+    } catch (e) {
+      setError(e.message);
     } finally {
       setSaving(false);
     }
   }
 
+  /* =========================
+     ESTADOS
+     ========================= */
   if (loading) {
     return <div style={{ padding: 40, color: "white" }}>Cargando…</div>;
   }
@@ -93,44 +129,35 @@ export default function AdminCaseEdit() {
     return <div style={{ padding: 40, color: "#ffb4b4" }}>{error}</div>;
   }
 
+  if (!form) {
+    return (
+      <div style={{ padding: 40, color: "#ffb4b4" }}>
+        No se pudo cargar el caso
+      </div>
+    );
+  }
+
   return (
     <div style={{ maxWidth: 900, margin: "0 auto", color: "white" }}>
       <h1 style={{ fontSize: 32, fontWeight: 800, marginBottom: 24 }}>
         Edit Case
       </h1>
 
-      {error && (
-        <div style={{ color: "#ffb4b4", marginBottom: 16 }}>{error}</div>
-      )}
-
       <form onSubmit={handleSubmit} style={{ display: "grid", gap: 18 }}>
-        {Object.keys(form).map(
-          (key) =>
-            key !== "id" && (
-              key === "description" ||
-              key === "solution" ||
-              key === "benefits" ||
-              key === "services" ||
-              key === "roles" ||
-              key === "technology" ? (
-                <Textarea
-                  key={key}
-                  name={key}
-                  label={key}
-                  value={form[key]}
-                  onChange={handleChange}
-                />
-              ) : (
-                <Input
-                  key={key}
-                  name={key}
-                  label={key}
-                  value={form[key]}
-                  onChange={handleChange}
-                />
-              )
-            )
-        )}
+        <Input label="Title" name="title" value={form.title} onChange={handleChange} />
+        <Input label="Category" name="category" value={form.category} onChange={handleChange} />
+        <Input label="Sector" name="sector" value={form.sector} onChange={handleChange} />
+        <Input label="Year" name="year" value={form.year} onChange={handleChange} />
+        <Input label="Budget" name="budget" value={form.budget} onChange={handleChange} />
+        <Input label="Status" name="status" value={form.status} onChange={handleChange} />
+
+        <Textarea label="Description" name="description" value={form.description} onChange={handleChange} />
+        <Textarea label="Solution" name="solution" value={form.solution} onChange={handleChange} />
+
+        <Textarea label="Benefits (one per line)" name="benefits" value={form.benefits} onChange={handleChange} />
+        <Textarea label="Services (one per line)" name="services" value={form.services} onChange={handleChange} />
+        <Textarea label="Roles (one per line)" name="roles" value={form.roles} onChange={handleChange} />
+        <Textarea label="Technology (one per line)" name="technology" value={form.technology} onChange={handleChange} />
 
         <button
           type="submit"
@@ -142,7 +169,8 @@ export default function AdminCaseEdit() {
             padding: "12px 20px",
             color: "white",
             fontWeight: 700,
-            cursor: "pointer"
+            cursor: "pointer",
+            opacity: saving ? 0.7 : 1
           }}
         >
           {saving ? "Saving…" : "Save Changes"}
@@ -153,8 +181,9 @@ export default function AdminCaseEdit() {
 }
 
 /* =========================
-   INPUTS
+   INPUTS REUTILIZABLES
    ========================= */
+
 function Input({ label, ...props }) {
   return (
     <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>

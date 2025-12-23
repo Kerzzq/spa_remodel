@@ -19,7 +19,7 @@ const router = createBrowserRouter([
       { path: "presentation", element: <AmaiaPresentation /> },
       { path: "administration", element: <Administration /> },
       { path: "admin/:id", element: <AdminCaseEdit /> },
-      { path: "admin/new", element: <AdminCaseCreate /> }
+      { path: "admin/create", element: <AdminCaseCreate /> }
     ]
   }
 ]);

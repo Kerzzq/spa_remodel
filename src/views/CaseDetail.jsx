@@ -7,20 +7,22 @@ export default function CaseDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    fetch("/api/cases")
+    useEffect(() => {
+    setLoading(true);
+    setError(null);
+
+    fetch(`/api/cases/${id}`)
       .then((res) => {
-        if (!res.ok) throw new Error("Error al cargar el caso");
+        if (res.status === 404) {
+          throw new Error("Caso no encontrado");
+        }
+        if (!res.ok) {
+          throw new Error("Error al cargar el caso");
+        }
         return res.json();
       })
       .then((data) => {
-        const found = Array.isArray(data)
-          ? data.find((c) => String(c.id) === String(id))
-          : null;
-
-        if (!found) throw new Error("Caso no encontrado");
-
-        setCaseData(found);
+        setCaseData(data);
         setLoading(false);
       })
       .catch((e) => {
