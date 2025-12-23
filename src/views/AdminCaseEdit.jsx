@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 export default function AdminCaseEdit() {
@@ -86,7 +86,7 @@ export default function AdminCaseEdit() {
 
       if (!res.ok) throw new Error("Error al guardar");
 
-      navigate("/admin");
+      navigate("/administration");
     } catch (e) {
       setError(e.message);
     } finally {
@@ -193,27 +193,41 @@ function Input({ label, ...props }) {
   );
 }
 
-function Textarea({ label, ...props }) {
+
+function Textarea({ label, value, ...props }) {
+  const ref = useRef(null);
+
+  function resize() {
+    if (!ref.current) return;
+    ref.current.style.height = "auto";
+    ref.current.style.height = `${ref.current.scrollHeight}px`;
+  }
+
+  // Ajuste inicial (cuando carga con texto)
+  useEffect(() => {
+    resize();
+  }, [value]);
+
   return (
     <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
       <span style={{ fontSize: 12, opacity: 0.75 }}>{label}</span>
       <textarea
-        {...props}
+        ref={ref}
+        value={value}
+        onInput={resize}
         rows={1}
-        onInput={(e) => {
-          e.target.style.height = "auto";
-          e.target.style.height = `${e.target.scrollHeight}px`;
-        }}
         style={{
           padding: "10px 14px",
           borderRadius: 10,
           border: "1px solid rgba(255,255,255,0.08)",
           background: "rgba(255,255,255,0.08)",
           color: "white",
-          resize: "vertical",     // ✅ se puede redimensionar
-          overflow: "hidden",     // ✅ scrollbar oculto
-          lineHeight: 1.5
+          resize: "vertical",   // el usuario puede redimensionar
+          overflow: "hidden",   // sin scrollbar
+          lineHeight: 1.5,
+          minHeight: 44         // evita la “cajita” minúscula
         }}
+        {...props}
       />
     </label>
   );
