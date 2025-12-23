@@ -1,40 +1,55 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 
-const INITIAL_STATE = {
-  title: "",
-  category: "",
-  sector: "",
-  year: "",
-  description: "",
-  solution: "",
-  benefits: "",
-  services: "",
-  roles: "",
-  technology: "",
-  budget: "",
-  status: ""
-};
-
-export default function AdminCaseCreate() {
+export default function AdminCaseEdit() {
+  const { id } = useParams();
   const navigate = useNavigate();
-  const [form, setForm] = useState(INITIAL_STATE);
-  const [error, setError] = useState(null);
+
+  const [form, setForm] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState(null);
+
+  /* =========================
+     CARGA POR ID + MAPEO
+     ========================= */
+  useEffect(() => {
+    fetch(`/api/cases/${id}`)
+      .then((res) => {
+        if (!res.ok) throw new Error("Caso no encontrado");
+        return res.json();
+      })
+      .then((data) => {
+        setForm({
+          title: data.title ?? "",
+          category: data.category ?? "",
+          sector: data.sector ?? "",
+          businessSegment: data.business_segment ?? "",
+          year: data.fecha ?? "",
+          budget: data.costo ?? "",
+          description: data.description ?? "",
+          solution: data.solution ?? "",
+          benefits: data.benefits ?? "",
+          services: data.services ?? "",
+          roles: data.roles ?? "",
+          technology: data.tecnologia ?? data.technology ?? ""
+        });
+        setLoading(false);
+      })
+      .catch((e) => {
+        setError(e.message);
+        setLoading(false);
+      });
+  }, [id]);
 
   function handleChange(e) {
     setForm({ ...form, [e.target.name]: e.target.value });
   }
 
-  function normalizeArray(value) {
-    return value
-      .split("\n")
-      .map((v) => v.trim())
-      .filter(Boolean);
-  }
-
   function validate() {
-    return Object.values(form).every((v) => v.trim() !== "");
+    return Object.values(form).every(
+      (v) => String(v).trim() !== ""
+    );
   }
 
   async function handleSubmit(e) {
@@ -46,94 +61,131 @@ export default function AdminCaseCreate() {
     }
 
     setSaving(true);
-    setError(null);
 
     const payload = {
-      ...form,
-      year: Number(form.year),
-      benefits: normalizeArray(form.benefits),
-      services: normalizeArray(form.services),
-      roles: normalizeArray(form.roles),
-      technology: normalizeArray(form.technology)
+      title: form.title,
+      category: form.category,
+      sector: form.sector,
+      business_segment: form.businessSegment,
+      fecha: form.year,
+      costo: form.budget,
+      description: form.description,
+      solution: form.solution,
+      benefits: form.benefits,
+      services: form.services,
+      roles: form.roles,
+      tecnologia: form.technology
     };
 
     try {
-      const res = await fetch("/api/cases", {
-        method: "POST",
+      const res = await fetch(`/api/cases/${id}`, {
+        method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
       });
 
-      if (!res.ok) throw new Error();
+      if (!res.ok) throw new Error("Error al guardar");
 
       navigate("/admin");
-    } catch {
-      setError("Error al crear el caso");
+    } catch (e) {
+      setError(e.message);
     } finally {
       setSaving(false);
     }
   }
 
+  if (loading) return <div style={{ padding: 40, color: "white" }}>Cargando…</div>;
+  if (error) return <div style={{ padding: 40, color: "#ffb4b4" }}>{error}</div>;
+
   return (
-    <div style={{ maxWidth: 900, margin: "0 auto", color: "white" }}>
+    <div style={{ maxWidth: 1200, margin: "0 auto", color: "white" }}>
       <h1 style={{ fontSize: 32, fontWeight: 800, marginBottom: 24 }}>
-        Create New Case
+        Editar Caso
       </h1>
 
-      {error && (
-        <div style={{ color: "#ffb4b4", marginBottom: 16 }}>{error}</div>
-      )}
+      <form
+        onSubmit={handleSubmit}
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1fr 2fr",
+          gap: 24
+        }}
+      >
+        {/* COLUMNA IZQUIERDA */}
+        <Panel title="Información Básica">
+          <Input label="Título del caso" name="title" value={form.title} onChange={handleChange} />
+          <Input label="Categoría" name="category" value={form.category} onChange={handleChange} />
+          <Input label="Sector" name="sector" value={form.sector} onChange={handleChange} />
+          <Input label="Segmento de negocio" name="businessSegment" value={form.businessSegment} onChange={handleChange} />
+          <Input label="Año" name="year" value={form.year} onChange={handleChange} />
+          <Input label="Coste" name="budget" value={form.budget} onChange={handleChange} />
+        </Panel>
 
-      <form onSubmit={handleSubmit} style={{ display: "grid", gap: 18 }}>
-        <Input name="title" label="Title" value={form.title} onChange={handleChange} />
-        <Input name="category" label="Category" value={form.category} onChange={handleChange} />
-        <Input name="sector" label="Sector" value={form.sector} onChange={handleChange} />
-        <Input name="year" label="Year" value={form.year} onChange={handleChange} />
-        <Input name="budget" label="Budget" value={form.budget} onChange={handleChange} />
-        <Input name="status" label="Status" value={form.status} onChange={handleChange} />
+        {/* COLUMNA DERECHA */}
+        <Panel title="Contenido Descriptivo">
+          <Textarea label="Descripción" name="description" value={form.description} onChange={handleChange} />
+          <Textarea label="Solución Propuesta" name="solution" value={form.solution} onChange={handleChange} />
+          <Textarea label="Servicios Prestados" name="services" value={form.services} onChange={handleChange} />
+          <Textarea label="Beneficios Clave" name="benefits" value={form.benefits} onChange={handleChange} />
+          <Textarea label="Roles Involucrados" name="roles" value={form.roles} onChange={handleChange} />
+          <Textarea label="Stack Tecnológico" name="technology" value={form.technology} onChange={handleChange} />
+        </Panel>
 
-        <Textarea name="description" label="Description" value={form.description} onChange={handleChange} />
-        <Textarea name="solution" label="Solution" value={form.solution} onChange={handleChange} />
-
-        <Textarea name="benefits" label="Benefits (one per line)" value={form.benefits} onChange={handleChange} />
-        <Textarea name="services" label="Services (one per line)" value={form.services} onChange={handleChange} />
-        <Textarea name="roles" label="Roles (one per line)" value={form.roles} onChange={handleChange} />
-        <Textarea name="technology" label="Technology (one per line)" value={form.technology} onChange={handleChange} />
-
-        <button
-          type="submit"
-          disabled={saving}
-          style={{
-            background: "#e91e63",
-            border: "none",
-            borderRadius: 999,
-            padding: "12px 20px",
-            color: "white",
-            fontWeight: 700,
-            cursor: "pointer"
-          }}
-        >
-          {saving ? "Saving…" : "Create Case"}
-        </button>
+        <div style={{ gridColumn: "1 / -1", textAlign: "right" }}>
+          <button
+            type="submit"
+            disabled={saving}
+            style={{
+              background: "#e91e63",
+              border: "none",
+              borderRadius: 999,
+              padding: "12px 28px",
+              color: "white",
+              fontWeight: 700,
+              cursor: "pointer"
+            }}
+          >
+            {saving ? "Guardando…" : "Guardar Cambios"}
+          </button>
+        </div>
       </form>
     </div>
   );
 }
 
 /* =========================
-   INPUTS REUTILIZABLES
+   UI COMPONENTS
    ========================= */
+
+function Panel({ title, children }) {
+  return (
+    <div
+      style={{
+        background: "rgba(255,255,255,0.06)",
+        borderRadius: 18,
+        padding: 24,
+        display: "flex",
+        flexDirection: "column",
+        gap: 14
+      }}
+    >
+      <h3 style={{ fontSize: 16, fontWeight: 800 }}>{title}</h3>
+      {children}
+    </div>
+  );
+}
+
 function Input({ label, ...props }) {
   return (
     <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-      <span style={{ fontSize: 13, opacity: 0.8 }}>{label}</span>
+      <span style={{ fontSize: 12, opacity: 0.75 }}>{label}</span>
       <input
         {...props}
         style={{
           padding: "10px 14px",
           borderRadius: 10,
           border: "1px solid rgba(255,255,255,0.2)",
-          background: "rgba(255,255,255,0.06)",
+          background: "rgba(255,255,255,0.08)",
           color: "white"
         }}
       />
@@ -144,15 +196,15 @@ function Input({ label, ...props }) {
 function Textarea({ label, ...props }) {
   return (
     <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-      <span style={{ fontSize: 13, opacity: 0.8 }}>{label}</span>
+      <span style={{ fontSize: 12, opacity: 0.75 }}>{label}</span>
       <textarea
         {...props}
-        rows={4}
+        rows={3}
         style={{
           padding: "10px 14px",
           borderRadius: 10,
-          border: "1px solid rgba(255,255,255,0.2)",
-          background: "rgba(255,255,255,0.06)",
+          border: "1px solid rgba(255,255,255,0.08)",
+          background: "rgba(255,255,255,0.08)",
           color: "white",
           resize: "vertical"
         }}

@@ -7,7 +7,8 @@ export default function Cases() {
   const [error, setError] = useState(null);
 
   const [filterMode, setFilterMode] = useState("category"); // category | sector
-  const [activeFilters, setActiveFilters] = useState([]); // múltiples
+  const [activeFilters, setActiveFilters] = useState([]);
+  const [search, setSearch] = useState("");
 
   /* =========================
      CARGA DESDE API (COSMOS)
@@ -19,13 +20,19 @@ export default function Cases() {
         return res.json();
       })
       .then((data) => {
-        // Normalización defensiva (Cosmos es flexible)
         const normalized = data.map((c) => ({
           id: c.id,
-          title: c.title ?? c.name ?? "Sin título",
+          title: c.title ?? "Sin título",
           description: c.description ?? "",
           category: c.category ?? "Otros",
-          sector: c.sector ?? "General"
+          sector: c.sector ?? "General",
+          year: c.fecha ?? "",
+          business_segment: c.business_segment ?? "",
+          solution: c.solution ?? "",
+          benefits: c.benefits ?? "",
+          services: c.services ?? "",
+          roles: c.roles ?? "",
+          technology: c.tecnologia ?? ""
         }));
 
         setCases(normalized);
@@ -38,37 +45,47 @@ export default function Cases() {
   }, []);
 
   /* =========================
+     BÚSQUEDA GLOBAL
+     ========================= */
+  const searchedCases = useMemo(() => {
+    if (!search.trim()) return cases;
+
+    const q = search.toLowerCase();
+
+    return cases.filter((c) =>
+      Object.values(c).some(
+        (v) => typeof v === "string" && v.toLowerCase().includes(q)
+      )
+    );
+  }, [cases, search]);
+
+  /* =========================
      CONTEO POR FILTRO
      ========================= */
   const filterCounts = useMemo(() => {
     const map = {};
 
-    cases.forEach((c) => {
+    searchedCases.forEach((c) => {
       const key = filterMode === "category" ? c.category : c.sector;
       if (!key) return;
       map[key] = (map[key] || 0) + 1;
     });
 
-    return Object.entries(map)
-      .filter(([, count]) => count > 0)
-      .sort((a, b) => b[1] - a[1]);
-  }, [cases, filterMode]);
+    return Object.entries(map).sort((a, b) => b[1] - a[1]);
+  }, [searchedCases, filterMode]);
 
   /* =========================
-     CASOS FILTRADOS
+     FILTRO PRIORITARIO
      ========================= */
   const filteredCases = useMemo(() => {
-    if (activeFilters.length === 0) return cases;
+    if (activeFilters.length === 0) return searchedCases;
 
-    return cases.filter((c) => {
+    return searchedCases.filter((c) => {
       const value = filterMode === "category" ? c.category : c.sector;
       return activeFilters.includes(value);
     });
-  }, [cases, activeFilters, filterMode]);
+  }, [searchedCases, activeFilters, filterMode]);
 
-  /* =========================
-     TOGGLE FILTRO
-     ========================= */
   function toggleFilter(value) {
     setActiveFilters((prev) =>
       prev.includes(value)
@@ -100,7 +117,7 @@ export default function Cases() {
       </h1>
 
       {/* SELECTOR DE MODO */}
-      <div style={{ marginBottom: 20 }}>
+      <div style={{ marginBottom: 14 }}>
         <select
           value={filterMode}
           onChange={(e) => {
@@ -123,6 +140,26 @@ export default function Cases() {
         </select>
       </div>
 
+      {/* 🔍 BARRA DE BÚSQUEDA */}
+      <div style={{ marginBottom: 20 }}>
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Buscar por cualquier campo del caso…"
+          style={{
+            width: "100%",
+            maxWidth: 420,
+            padding: "10px 14px",
+            borderRadius: 12,
+            border: "1px solid rgba(255,255,255,0.3)",
+            background: "rgba(255,255,255,0.1)",
+            color: "white",
+            fontSize: 14
+          }}
+        />
+      </div>
+
       {/* FILTROS */}
       <div
         style={{
@@ -134,7 +171,7 @@ export default function Cases() {
       >
         <FilterButton
           label="Ver todos"
-          count={cases.length}
+          count={searchedCases.length}
           active={activeFilters.length === 0}
           onClick={clearFilters}
         />
@@ -171,59 +208,34 @@ export default function Cases() {
                 boxShadow: "0 12px 32px rgba(0,0,0,0.18)",
                 transition: "transform 0.2s ease"
               }}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.transform = "translateY(-4px)")
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.transform = "translateY(0)")
-              }
             >
-              {/* TAG */}
-              {c.category && (
-                <span
-                  style={{
-                    alignSelf: "flex-start",
-                    background: "#e91e63",
-                    color: "white",
-                    fontSize: 12,
-                    fontWeight: 700,
-                    padding: "4px 12px",
-                    borderRadius: 999
-                  }}
-                >
-                  {c.category}
-                </span>
-              )}
+              <span
+                style={{
+                  alignSelf: "flex-start",
+                  background: "#e91e63",
+                  color: "white",
+                  fontSize: 12,
+                  fontWeight: 700,
+                  padding: "4px 12px",
+                  borderRadius: 999
+                }}
+              >
+                {c.category}
+              </span>
 
-              {/* TÍTULO */}
               <h2
                 style={{
                   fontSize: 20,
                   fontWeight: 800,
                   color: "#111",
-                  lineHeight: 1.3,
-                  display: "-webkit-box",
-                  WebkitLineClamp: 3,
-                  WebkitBoxOrient: "vertical",
-                  overflow: "hidden"
+                  lineHeight: 1.3
                 }}
               >
                 {c.title}
               </h2>
 
-              {/* DESCRIPCIÓN */}
               {c.description && (
-                <p
-                  style={{
-                    color: "#555",
-                    fontSize: 14,
-                    lineHeight: 1.6,
-                    display: "-webkit-box",
-                    WebkitLineClamp: 4,
-                    WebkitBoxOrient: "vertical",
-                    overflow: "hidden"
-                  }}
-                >
+                <p style={{ color: "#555", fontSize: 14 }}>
                   {c.description}
                 </p>
               )}
@@ -253,8 +265,7 @@ function FilterButton({ label, count, active, onClick }) {
         cursor: "pointer",
         border: active ? "none" : "1px solid rgba(255,255,255,0.4)",
         background: active ? "#e91e63" : "transparent",
-        color: "white",
-        transition: "all 0.15s ease"
+        color: "white"
       }}
     >
       {label}
