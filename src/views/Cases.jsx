@@ -22,7 +22,7 @@ export default function Cases() {
       .then((data) => {
         const normalized = data.map((c) => ({
           id: c.id,
-          title: c.title ?? "Sin título",
+          title: c.title ?? c.name ?? "Sin título",
           description: c.description ?? "",
           category: c.category ?? "Otros",
           sector: c.sector ?? "General",
@@ -71,7 +71,9 @@ export default function Cases() {
       map[key] = (map[key] || 0) + 1;
     });
 
-    return Object.entries(map).sort((a, b) => b[1] - a[1]);
+    return Object.entries(map)
+      .filter(([, count]) => count > 0)
+      .sort((a, b) => b[1] - a[1]);
   }, [searchedCases, filterMode]);
 
   /* =========================
@@ -113,7 +115,7 @@ export default function Cases() {
     <div style={{ maxWidth: 1200, margin: "0 auto", color: "white" }}>
       {/* TÍTULO */}
       <h1 style={{ fontSize: 48, fontWeight: 800, marginBottom: 24 }}>
-        Historias de Éxito
+        Success Stories
       </h1>
 
       {/* SELECTOR DE MODO */}
@@ -153,7 +155,7 @@ export default function Cases() {
             padding: "10px 14px",
             borderRadius: 12,
             border: "1px solid rgba(255,255,255,0.3)",
-            background: "rgba(255,255,255,0.1)",
+            background: "#2b003d",
             color: "white",
             fontSize: 14
           }}
@@ -208,34 +210,59 @@ export default function Cases() {
                 boxShadow: "0 12px 32px rgba(0,0,0,0.18)",
                 transition: "transform 0.2s ease"
               }}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.transform = "translateY(-4px)")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.transform = "translateY(0)")
+              }
             >
-              <span
-                style={{
-                  alignSelf: "flex-start",
-                  background: "#e91e63",
-                  color: "white",
-                  fontSize: 12,
-                  fontWeight: 700,
-                  padding: "4px 12px",
-                  borderRadius: 999
-                }}
-              >
-                {c.category}
-              </span>
+              {/* TAG */}
+              {c.category && (
+                <span
+                  style={{
+                    alignSelf: "flex-start",
+                    background: "#e91e63",
+                    color: "white",
+                    fontSize: 12,
+                    fontWeight: 700,
+                    padding: "4px 12px",
+                    borderRadius: 999
+                  }}
+                >
+                  {c.category}
+                </span>
+              )}
 
+              {/* TÍTULO (3 líneas) */}
               <h2
                 style={{
                   fontSize: 20,
                   fontWeight: 800,
                   color: "#111",
-                  lineHeight: 1.3
+                  lineHeight: 1.3,
+                  display: "-webkit-box",
+                  WebkitLineClamp: 3,
+                  WebkitBoxOrient: "vertical",
+                  overflow: "hidden"
                 }}
               >
                 {c.title}
               </h2>
 
+              {/* DESCRIPCIÓN (4 líneas) */}
               {c.description && (
-                <p style={{ color: "#555", fontSize: 14 }}>
+                <p
+                  style={{
+                    color: "#555",
+                    fontSize: 14,
+                    lineHeight: 1.6,
+                    display: "-webkit-box",
+                    WebkitLineClamp: 4,
+                    WebkitBoxOrient: "vertical",
+                    overflow: "hidden"
+                  }}
+                >
                   {c.description}
                 </p>
               )}
@@ -265,7 +292,8 @@ function FilterButton({ label, count, active, onClick }) {
         cursor: "pointer",
         border: active ? "none" : "1px solid rgba(255,255,255,0.4)",
         background: active ? "#e91e63" : "transparent",
-        color: "white"
+        color: "white",
+        transition: "all 0.15s ease"
       }}
     >
       {label}

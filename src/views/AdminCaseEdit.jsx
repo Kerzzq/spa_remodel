@@ -199,14 +199,20 @@ function Textarea({ label, ...props }) {
       <span style={{ fontSize: 12, opacity: 0.75 }}>{label}</span>
       <textarea
         {...props}
-        rows={3}
+        rows={1}
+        onInput={(e) => {
+          e.target.style.height = "auto";
+          e.target.style.height = `${e.target.scrollHeight}px`;
+        }}
         style={{
           padding: "10px 14px",
           borderRadius: 10,
           border: "1px solid rgba(255,255,255,0.08)",
           background: "rgba(255,255,255,0.08)",
           color: "white",
-          resize: "vertical"
+          resize: "none",
+          overflow: "hidden",
+          lineHeight: 1.5
         }}
       />
     </label>

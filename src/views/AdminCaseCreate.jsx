@@ -1,46 +1,26 @@
-import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-export default function AdminCaseEdit() {
-  const { id } = useParams();
+export default function AdminCaseCreate() {
   const navigate = useNavigate();
 
-  const [form, setForm] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [form, setForm] = useState({
+    title: "",
+    category: "",
+    sector: "",
+    businessSegment: "",
+    year: "",
+    budget: "",
+    description: "",
+    solution: "",
+    benefits: "",
+    services: "",
+    roles: "",
+    technology: ""
+  });
+
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
-
-  /* =========================
-     CARGA POR ID + MAPEO
-     ========================= */
-  useEffect(() => {
-    fetch(`/api/cases/${id}`)
-      .then((res) => {
-        if (!res.ok) throw new Error("Caso no encontrado");
-        return res.json();
-      })
-      .then((data) => {
-        setForm({
-          title: data.title ?? "",
-          category: data.category ?? "",
-          sector: data.sector ?? "",
-          businessSegment: data.business_segment ?? "",
-          year: data.fecha ?? "",
-          budget: data.costo ?? "",
-          description: data.description ?? "",
-          solution: data.solution ?? "",
-          benefits: data.benefits ?? "",
-          services: data.services ?? "",
-          roles: data.roles ?? "",
-          technology: data.tecnologia ?? data.technology ?? ""
-        });
-        setLoading(false);
-      })
-      .catch((e) => {
-        setError(e.message);
-        setLoading(false);
-      });
-  }, [id]);
 
   function handleChange(e) {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -61,6 +41,7 @@ export default function AdminCaseEdit() {
     }
 
     setSaving(true);
+    setError(null);
 
     const payload = {
       title: form.title,
@@ -78,13 +59,15 @@ export default function AdminCaseEdit() {
     };
 
     try {
-      const res = await fetch(`/api/cases/${id}`, {
-        method: "PUT",
+      const res = await fetch("/api/cases", {
+        method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
       });
 
-      if (!res.ok) throw new Error("Error al guardar");
+      if (!res.ok) {
+        throw new Error("Error al crear el caso");
+      }
 
       navigate("/admin");
     } catch (e) {
@@ -94,14 +77,22 @@ export default function AdminCaseEdit() {
     }
   }
 
-  if (loading) return <div style={{ padding: 40, color: "white" }}>Cargando…</div>;
-  if (error) return <div style={{ padding: 40, color: "#ffb4b4" }}>{error}</div>;
-
   return (
     <div style={{ maxWidth: 1200, margin: "0 auto", color: "white" }}>
-      <h1 style={{ fontSize: 32, fontWeight: 800, marginBottom: 24 }}>
-        Editar Caso
+      {/* HEADER */}
+      <h1 style={{ fontSize: 32, fontWeight: 800, marginBottom: 8 }}>
+        Crear Nuevo Caso
       </h1>
+
+      <p style={{ opacity: 0.7, marginBottom: 24 }}>
+        Documenta una nueva historia de éxito para el catálogo de experiencias de IA.
+      </p>
+
+      {error && (
+        <div style={{ color: "#ffb4b4", marginBottom: 16 }}>
+          {error}
+        </div>
+      )}
 
       <form
         onSubmit={handleSubmit}
@@ -111,17 +102,26 @@ export default function AdminCaseEdit() {
           gap: 24
         }}
       >
-        {/* COLUMNA IZQUIERDA */}
+        {/* =========================
+            COLUMNA IZQUIERDA
+            ========================= */}
         <Panel title="Información Básica">
           <Input label="Título del caso" name="title" value={form.title} onChange={handleChange} />
           <Input label="Categoría" name="category" value={form.category} onChange={handleChange} />
           <Input label="Sector" name="sector" value={form.sector} onChange={handleChange} />
-          <Input label="Segmento de negocio" name="businessSegment" value={form.businessSegment} onChange={handleChange} />
+          <Input
+            label="Segmento de negocio"
+            name="businessSegment"
+            value={form.businessSegment}
+            onChange={handleChange}
+          />
           <Input label="Año" name="year" value={form.year} onChange={handleChange} />
           <Input label="Coste" name="budget" value={form.budget} onChange={handleChange} />
         </Panel>
 
-        {/* COLUMNA DERECHA */}
+        {/* =========================
+            COLUMNA DERECHA
+            ========================= */}
         <Panel title="Contenido Descriptivo">
           <Textarea label="Descripción" name="description" value={form.description} onChange={handleChange} />
           <Textarea label="Solución Propuesta" name="solution" value={form.solution} onChange={handleChange} />
@@ -131,7 +131,32 @@ export default function AdminCaseEdit() {
           <Textarea label="Stack Tecnológico" name="technology" value={form.technology} onChange={handleChange} />
         </Panel>
 
-        <div style={{ gridColumn: "1 / -1", textAlign: "right" }}>
+        {/* =========================
+            ACTIONS
+            ========================= */}
+        <div
+          style={{
+            gridColumn: "1 / -1",
+            display: "flex",
+            justifyContent: "flex-end",
+            gap: 12
+          }}
+        >
+          <button
+            type="button"
+            onClick={() => navigate("/admin")}
+            style={{
+              background: "transparent",
+              border: "1px solid rgba(255,255,255,0.3)",
+              borderRadius: 999,
+              padding: "10px 22px",
+              color: "white",
+              cursor: "pointer"
+            }}
+          >
+            Cancelar
+          </button>
+
           <button
             type="submit"
             disabled={saving}
@@ -139,13 +164,14 @@ export default function AdminCaseEdit() {
               background: "#e91e63",
               border: "none",
               borderRadius: 999,
-              padding: "12px 28px",
+              padding: "10px 26px",
               color: "white",
               fontWeight: 700,
-              cursor: "pointer"
+              cursor: "pointer",
+              opacity: saving ? 0.7 : 1
             }}
           >
-            {saving ? "Guardando…" : "Guardar Cambios"}
+            {saving ? "Guardando…" : "Guardar Caso"}
           </button>
         </div>
       </form>
@@ -192,21 +218,26 @@ function Input({ label, ...props }) {
     </label>
   );
 }
-
 function Textarea({ label, ...props }) {
   return (
     <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
       <span style={{ fontSize: 12, opacity: 0.75 }}>{label}</span>
       <textarea
         {...props}
-        rows={3}
+        rows={1}
+        onInput={(e) => {
+          e.target.style.height = "auto";
+          e.target.style.height = `${e.target.scrollHeight}px`;
+        }}
         style={{
           padding: "10px 14px",
           borderRadius: 10,
           border: "1px solid rgba(255,255,255,0.08)",
           background: "rgba(255,255,255,0.08)",
           color: "white",
-          resize: "vertical"
+          resize: "none",
+          overflow: "hidden",
+          lineHeight: 1.5
         }}
       />
     </label>
