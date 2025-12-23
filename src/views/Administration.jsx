@@ -5,12 +5,12 @@ export default function Administration() {
   const navigate = useNavigate();
 
   const [cases, setCases] = useState([]);
-  const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [search, setSearch] = useState("");
 
   /* =========================
-     CARGA DE CASOS
+     CARGA DESDE API (COSMOS)
      ========================= */
   useEffect(() => {
     fetch("/api/cases")
@@ -19,7 +19,7 @@ export default function Administration() {
         return res.json();
       })
       .then((data) => {
-        setCases(Array.isArray(data) ? data : []);
+        setCases(data);
         setLoading(false);
       })
       .catch(() => {
@@ -29,26 +29,24 @@ export default function Administration() {
   }, []);
 
   /* =========================
-     FILTRO POR TEXTO GLOBAL
+     FILTRO GLOBAL (SEARCH)
      ========================= */
   const filteredCases = useMemo(() => {
-    if (!query.trim()) return cases;
+    if (!search.trim()) return cases;
 
-    const q = query.toLowerCase();
+    const q = search.toLowerCase();
 
     return cases.filter((c) =>
-      Object.values(c).some((value) => {
-        if (!value) return false;
-
-        if (Array.isArray(value)) {
-          return value.join(" ").toLowerCase().includes(q);
-        }
-
-        return String(value).toLowerCase().includes(q);
-      })
+      Object.values(c).some(
+        (value) =>
+          typeof value === "string" && value.toLowerCase().includes(q)
+      )
     );
-  }, [cases, query]);
+  }, [cases, search]);
 
+  /* =========================
+     ESTADOS
+     ========================= */
   if (loading) {
     return <div style={{ padding: 40, color: "white" }}>Cargando casos…</div>;
   }
@@ -58,35 +56,34 @@ export default function Administration() {
   }
 
   return (
-    <div style={{ maxWidth: 1200, margin: "0 auto", color: "white" }}>
-      {/* =========================
-          CABECERA
-          ========================= */}
+    <div style={{ maxWidth: 1100, margin: "0 auto", color: "white" }}>
+      {/* HEADER */}
       <div
         style={{
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          marginBottom: 32
+          marginBottom: 28
         }}
       >
         <div>
-          <h1 style={{ fontSize: 32, fontWeight: 800 }}>
+          <h1 style={{ fontSize: 36, fontWeight: 800 }}>
             Case Administration
           </h1>
-          <p style={{ opacity: 0.7 }}>
-            Manage and organize success stories for the AI Experience Center
+          <p style={{ opacity: 0.7, fontSize: 14 }}>
+            Manage and organize success stories
           </p>
         </div>
 
         <button
-          onClick={() => navigate("/admin/new")}
+          onClick={() => navigate("/admin/create")}
           style={{
-            background: "#e91e63",
-            color: "white",
+            background: "linear-gradient(135deg, #e91e63, #ff5fa2)",
             border: "none",
+            color: "white",
+            padding: "10px 18px",
             borderRadius: 999,
-            padding: "10px 20px",
+            fontSize: 14,
             fontWeight: 700,
             cursor: "pointer"
           }}
@@ -95,41 +92,50 @@ export default function Administration() {
         </button>
       </div>
 
-      {/* =========================
-          BUSCADOR
-          ========================= */}
-      <input
-        type="text"
-        placeholder="Search by any field…"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        style={{
-          width: "100%",
-          marginBottom: 24,
-          padding: "12px 16px",
-          borderRadius: 12,
-          border: "1px solid rgba(255,255,255,0.2)",
-          background: "rgba(255,255,255,0.06)",
-          color: "white",
-          fontSize: 14
-        }}
-      />
+      {/* SEARCH */}
+      <div style={{ marginBottom: 24 }}>
+        <input
+          type="text"
+          placeholder="Search by any field..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          style={{
+            width: "100%",
+            padding: "12px 16px",
+            borderRadius: 12,
+            border: "1px solid rgba(255,255,255,0.2)",
+            background: "rgba(255,255,255,0.06)",
+            color: "white",
+            outline: "none"
+          }}
+        />
+      </div>
 
-      {/* =========================
-          LISTA DE CASOS
-          ========================= */}
+      {/* LIST */}
       <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
         {filteredCases.map((c) => (
-          <div
+          <button
             key={c.id}
+            onClick={() => navigate(`/admin/${c.id}`)}
             style={{
               background: "rgba(255,255,255,0.06)",
               borderRadius: 16,
               padding: "16px 20px",
               display: "flex",
               justifyContent: "space-between",
-              alignItems: "center"
+              alignItems: "center",
+              border: "1px solid rgba(255,255,255,0.08)",
+              cursor: "pointer",
+              textAlign: "left",
+              color: "white",
+              transition: "all 0.2s ease"
             }}
+            onMouseEnter={(e) =>
+              (e.currentTarget.style.background = "rgba(255,255,255,0.1)")
+            }
+            onMouseLeave={(e) =>
+              (e.currentTarget.style.background = "rgba(255,255,255,0.06)")
+            }
           >
             <div>
               <h3 style={{ fontSize: 16, fontWeight: 700 }}>
@@ -157,43 +163,15 @@ export default function Administration() {
                 </span>
               )}
             </div>
-
-            {/* ACCIONES */}
-            <div style={{ display: "flex", gap: 12 }}>
-              <IconButton
-                label="Ver"
-                onClick={() => navigate(`/cases/${c.id}`)}
-              />
-              <IconButton
-                label="Editar"
-                onClick={() => navigate(`/admin/${c.id}/edit`)}
-              />
-            </div>
-          </div>
+          </button>
         ))}
+
+        {filteredCases.length === 0 && (
+          <div style={{ opacity: 0.6, padding: 20 }}>
+            No cases match your search
+          </div>
+        )}
       </div>
     </div>
-  );
-}
-
-/* =========================
-   BOTÓN ICONO
-   ========================= */
-function IconButton({ label, onClick }) {
-  return (
-    <button
-      onClick={onClick}
-      style={{
-        background: "transparent",
-        border: "1px solid rgba(255,255,255,0.25)",
-        color: "white",
-        borderRadius: 10,
-        padding: "6px 12px",
-        fontSize: 12,
-        cursor: "pointer"
-      }}
-    >
-      {label}
-    </button>
   );
 }

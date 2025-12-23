@@ -30,7 +30,7 @@ export default function AmaiaPresentation() {
             maxWidth: 720
           }}
         >
-          Presentación del asistente inteligente y su propuesta de valor dentro
+          Presentación de AMAIA y su propuesta de valor dentro
           del ecosistema de soluciones de IA generativa.
         </p>
       </div>
@@ -67,7 +67,7 @@ export default function AmaiaPresentation() {
             }}
           >
             <source
-              src="../../public/statics/videos/presentacion-amaia-v1.mp4"
+              src="/statics/videos/presentacion-amaia-v1.mp4"
               type="video/mp4"
             />
             Tu navegador no soporta reproducción de vídeo.
