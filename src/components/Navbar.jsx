@@ -30,13 +30,13 @@ export default function NavBar() {
         <NavLink to="/" style={navLink}>
           Home
         </NavLink>
-        <a href="#" style={linkStyle}>Soluciones</a>
+        <a href="#" style={linkStyle}>Solutions</a>
 
         <NavLink to="/cases" style={navLink}>
-          Historias de Éxito
+          Success Stories
         </NavLink>
 
-        <a href="#" style={linkStyle}>Contacto</a>
+        <a href="#" style={linkStyle}>Contact</a>
       </nav>
     </header>
   );

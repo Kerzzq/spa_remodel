@@ -5,12 +5,12 @@ export default function Home() {
   const { uiMessage, setUiMessage } = useApp();
 
   return (
-    <div style={{ alignItems: "center", display: "flex", flexDirection: "column", gap: 3 }}>
-      <h1 style={{ marginTop: 0 }}>Welcome - Amaia</h1>
+    <div style={{ alignItems: "center", display: "flex", flexDirection: "column", gap: 12 }}>
+      <h1 style={{ marginTop: 0 }}>Welcome - AMAIA</h1>
 
-      <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
+      <div style={{ display: "flex", gap: 0, alignItems: "center", flexWrap: "wrap" }}>
         <Link
-          to="/"
+          to="/presentation"
           style={{
             border: "1px solid #e6e6e6",
             borderRadius: 12,
@@ -24,7 +24,7 @@ export default function Home() {
             textDecoration: "none",
           }}
         >
-          Amaia presentation
+          Amaia Presentation
         </Link>
       </div>
 
@@ -68,14 +68,14 @@ export default function Home() {
             textDecoration: "none",
           }}
         >
-          Let's explore
+          Let's Explore
         </Link>
       </div>
 
 
             <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
         <Link
-          to="/"
+          to="/administration"
           style={{
             border: "1px solid #e6e6e6",
             borderRadius: 12,

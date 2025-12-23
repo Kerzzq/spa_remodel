@@ -20,7 +20,7 @@ export default function AmaiaPresentation() {
             marginBottom: 12
           }}
         >
-          Amaia
+          AMAIA
         </h1>
 
         <p
@@ -67,7 +67,7 @@ export default function AmaiaPresentation() {
             }}
           >
             <source
-              src="../../public/statics/videos/amaia-presentation.mp4"
+              src="../../public/statics/videos/presentacion-amaia-v1.mp4"
               type="video/mp4"
             />
             Tu navegador no soporta reproducción de vídeo.
